@@ -2,6 +2,8 @@
 
 質問用のリポジトリです。
 
+*追記: 回答を頂いた結果、 =splay=, =rotate= に ={-# INLINABLE #-}= を付けると =0.678= 秒まで高速化されました。* 今までの体感としては ={-# INLINABLE #-}= には効果が無かったのですが、 private な関数には効くのかもしれません (裏取り無し) 。ありがとうございました！！
+
 ** 質問内容
 
 C++ ライブラリを写経してテスト問題 ([[https://judge.yosupo.jp/problem/dynamic_tree_vertex_add_path_sum][Dynamic Tree Vertex Add Path Sum]]) を解きました。 C++ の実行結果 (0.259 秒) に比べ、 Haskell の実行結果 (2.47 秒) が約 10 倍遅いです。 C++ の 2 ~ 4 倍程度まで高速化したいのですが、何か方法に心当たりがあれば教えてください。
