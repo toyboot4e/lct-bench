@@ -21,9 +21,9 @@ $ just cpp
 
 #+CAPTION: 実行結果
 #+BEGIN_SRC txt
-[INFO] slowest: 0.243964 sec  (for max_random_01)
-[INFO] max memory: 26.880000 MB  (for max_random_00)
-[SUCCESS] test success: 16 cases
+[INFO] slowest: 0.259401 sec  (for max_random_02)
+[INFO] max memory: 17.440000 MB  (for max_random_00)
+[SUCCESS] test success: 12 cases
 #+END_SRC
 
 *** Haskell 版のテスト実行
@@ -35,9 +35,10 @@ $ just hs
 
 #+CAPTION: 実行結果
 #+BEGIN_SRC txt
-[INFO] slowest: 3.078916 sec  (for max_random_00)
-[INFO] max memory: 44.320000 MB  (for max_random_00)
+[INFO] slowest: 2.473940 sec  (for max_random_00)
+[INFO] max memory: 42.720000 MB  (for max_random_01)
 [SUCCESS] test success: 12 cases
+WARNING:onlinejudge_verify.languages.user_defined:The functionality to list dependencies of .hs file is not implemented yet.
 #+END_SRC
 
 #+BEGIN_QUOTE
@@ -46,51 +47,14 @@ Haskell の入力処理は 0.109 ms でしたので、やはり LCT の計算部
 
 ** 質問内容
 
-C++ の実行結果 (0.243 ms) に比べ、 Haskell の実行結果 (3.07 ms) が遅いです。 C++ の 2 ~ 4 倍程度まで高速化したいのですが、何か方法に心当たりがあれば教えてください。
+C++ の実行結果 (0.259 ms) に比べ、 Haskell の実行結果 (2.47 ms) が約 10 倍遅いです。 C++ の 2 ~ 4 倍程度まで高速化したいのですが、何か方法に心当たりがあれば教えてください。
 
 - [[./hs/src/Lct.hs]]: link/cut tree の実装モジュールです。このソース中で高速化できる点があればお伺いしたいです。
 - [[./hs/app/lct-test.hs]]: テスト問題の回答プログラムです。
   - [[https://judge.yosupo.jp/problem/dynamic_tree_vertex_add_path_sum][Dynamic Tree Vertex Add Path Sum]]: テスト用の問題です。
 
-=Lct.hs= は基本的に C++ 版の ([[./cpp/graph/ds/link_cut_tree.hpp]]) の写経です。データの持ち方は異なりますが、その他のソースはほぼ同一ですので、 Haskell ならではの低速化がないか探しています。
+=Lct.hs= は基本的に C++ 版の ([[./cpp/graph/ds/link_cut_tree.hpp]]) の写経です。データの持ち方が異なりますが、その他のソースはほぼ同一ですので、 Haskell ならではの低速化がないか探しています。
 
-CPP 版のデータの持ち方:
-
-#+BEGIN_SRC cpp
-struct Link_Cut_Tree {
-  using np = Node *;
-  int n;
-  vc<Node> nodes;
-}
-
-struct Node {
-  using np = Node *;
-  np l, r, p;
-  int idx, size;
-  bool rev;
-  struct X {
-    ll cnt, sum;
-  };
-
-  using VX = X;
-  X x, vx, mid;
-  ll lazy, lazy_light, cancel;
-}
-#+END_SRC
-
-Haskell 版のデータの持ち方:
-
-#+BEGIN_SRC haskell
--- | Link/cut tree.
-data Lct s a = Lct
-  { lLct :: !(VUM.MVector s IndexLct),
-    rLct :: !(VUM.MVector s IndexLct),
-    pLct :: !(VUM.MVector s IndexLct),
-    sLct :: !(VUM.MVector s Int),
-    revLct :: !(VUM.MVector s Bit),
-    vLct :: !(VUM.MVector s a),
-    aggLct :: !(VUM.MVector s a),
-    midLct :: !(VUM.MVector s a)
-  }
-#+END_SRC
+- CPP 版のデータの持ち方: =std::vector<Node>= (array of structs)
+- Haskell 版のデータの持ち方: =VU.Vector Int=, =VU.Vector Int=, =VU.Vector Int=, .. (struct of arrays)
 

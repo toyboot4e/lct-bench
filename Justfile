@@ -7,7 +7,7 @@ help:
 
 # runs the C++ test
 cpp:
-    cd cpp && touch test/*.cpp && oj-verify run test/dynamic_tree_subtree_add_subtree_sum.test.cpp
+    cd cpp && touch test/*.cpp && oj-verify run test/dynamic_tree_vertex_add_path_sum.test.cpp
 
 # runs the Haskell test
 hs:
