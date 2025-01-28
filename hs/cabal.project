@@ -1,0 +1,7 @@
+packages:
+  ./hs.cabal
+
+constraints: bitvec +libgmp,
+             -- clock +llvm,
+             -- vector-algorithms +llvm
+optimization: 2

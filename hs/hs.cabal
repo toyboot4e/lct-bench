@@ -1,0 +1,36 @@
+cabal-version:   3.4
+name:            hs
+version:         0.1.0.0
+license:         CC0-1.0
+-- license-file:    LICENSE
+author:
+maintainer:
+build-type:      Simple
+
+common deps
+  ghc-options:        -Wall -fllvm -O2
+  build-depends:
+    , ac-library-hs
+    , base               >=4.9     && <4.22
+    , bitvec             <1.2
+    , bytestring         <0.14
+    , mtl
+    , primitive          >=0.6.4.0 && <0.10
+    , transformers
+    , vector             >=0.13.0  && <0.14
+    , vector-algorithms  <0.10
+
+  default-language:   GHC2021
+
+library
+  import:          deps
+  exposed-modules:
+    , Lct
+    , Util
+  hs-source-dirs:  src
+
+executable lct-test
+  import:         deps
+  main-is:        lct-test.hs
+  build-depends:  hs
+  hs-source-dirs: app
