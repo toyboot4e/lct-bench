@@ -18,7 +18,6 @@ common deps
     , primitive          >=0.6.4.0 && <0.10
     , transformers
     , vector             >=0.13.0  && <0.14
-    , vector-algorithms  <0.10
 
   default-language:   GHC2021
 
