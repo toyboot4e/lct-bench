@@ -1,0 +1,8 @@
+#!/usr/bin/env -S bash
+
+dir="$(basename "$1" .hs)"
+cabal build "$dir"
+
+cp -f "$(cabal list-bin "$dir")" ./main
+chmod +x ./main
+
