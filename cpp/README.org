@@ -1,0 +1,8 @@
+* CPP
+
+[[https://github.com/maspypy/library][=maspypy/library=]] の関連箇所をコピーしました。
+
+#+BEGIN_QUOTE
+『コピペ使用等，ご自由に利用してください』 - ([[https://maspypy.github.io/library/][ドキュメントページより]])
+#+END_QUOTE
+
