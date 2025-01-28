@@ -1,0 +1,7 @@
+# Run `nvfetcher` to generate `_sources/` of `fetchFromGitHub`:
+# https://github.com/berberman/nvfetcher
+
+[oj-verify]
+src.git = "https://github.com/online-judge-tools/verification-helper"
+src.branch = "master"
+fetch.github = "online-judge-tools/verification-helper"

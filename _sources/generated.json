@@ -1,0 +1,22 @@
+{
+    "oj-verify": {
+        "cargoLocks": null,
+        "date": "2024-10-09",
+        "extract": null,
+        "name": "oj-verify",
+        "passthru": null,
+        "pinned": false,
+        "src": {
+            "deepClone": false,
+            "fetchSubmodules": false,
+            "leaveDotGit": false,
+            "name": null,
+            "owner": "online-judge-tools",
+            "repo": "verification-helper",
+            "rev": "adbff121b1f96de5f34e9f1483eb47d661c54075",
+            "sha256": "sha256-f7Ge8kLRQv9uxdNGtgNsypGVY0XAnKPCg8HYQ5nT6mI=",
+            "type": "github"
+        },
+        "version": "adbff121b1f96de5f34e9f1483eb47d661c54075"
+    }
+}
