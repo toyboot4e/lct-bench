@@ -1,0 +1,24 @@
+* LCT 高速化
+
+** 環境構築
+
+Linux の Nix (Flakes) ユーザは =direnv allow= で環境構築できると思います。
+
+他の環境はセットアップできていません。
+
+** テストの実行方法
+
+[[https://github.com/casey/just][=just=]] (タスクランナー) でコマンドを作成しました。
+
+*** C++ のテスト実行
+
+#+BEGIN_SRC sh
+$ just cpp
+#+END_SRC
+
+*** Haskell のテスト実行
+
+#+BEGIN_SRC sh
+$ just hs
+#+END_SRC
+
