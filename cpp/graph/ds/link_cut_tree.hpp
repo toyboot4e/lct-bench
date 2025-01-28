@@ -14,21 +14,6 @@ struct Link_Cut_Tree {
 
   Node *operator[](int v) { return &nodes[v]; }
 
-  // underlying tree の根
-  Node *get_root(Node *c) {
-    expose(c);
-    c->push();
-    while (c->l) {
-      c = c->l;
-      c->push();
-    }
-    splay(c);
-    return c;
-  }
-
-  // underlying tree の根
-  int get_root(int c) { return get_root(&nodes[c])->idx; }
-
   // parent(c)==p となるように link.
   void link(Node *c, Node *p) {
     evert(c);
@@ -71,44 +56,6 @@ struct Link_Cut_Tree {
   // c は splay tree の根にもなる.
   void evert(int c) { evert(&nodes[c]); }
 
-  Node *lca(Node *u, Node *v) {
-    assert(get_root(u) == get_root(v));
-    expose(u);
-    return expose(v);
-  }
-
-  int lca(int u, int v) { return lca(&nodes[u], &nodes[v])->idx; }
-
-  // 辺の個数
-  int dist(int u, int v) {
-    evert(u), expose(v);
-    return ((*this)[v]->size) - 1;
-  }
-
-  Node *jump(Node *u, Node *v, int k) {
-    evert(v);
-    expose(u);
-    assert(0 <= k && k < (u->size));
-    while (1) {
-      u->push();
-      int rs = (u->r ? u->r->size : 0);
-      if (k < rs) {
-        u = u->r;
-        continue;
-      }
-      if (k == rs) { break; }
-      k -= rs + 1;
-      u = u->l;
-    }
-    splay(u);
-    return u;
-  }
-
-  int jump(int u, int v, int k) {
-    auto c = jump((*this)[u], (*this)[v], k);
-    return c->idx;
-  }
-
   // [root, c] がひとつの splay tree になるように変更する.
   // c が右端で splay tree の根という状態になる.
   // path query はこの状態で c の data を見る.
@@ -139,20 +86,6 @@ struct Link_Cut_Tree {
     return x->idx;
   }
 
-  Node *get_parent(Node *x) {
-    expose(x);
-    x->push();
-    if (!x->l) return nullptr;
-    x = x->l, x->push();
-    while (x->r) x = x->r, x->push();
-    return x;
-  }
-
-  int get_parent(int x) {
-    Node *p = get_parent((*this)[x]);
-    return (p ? p->idx : -1);
-  }
-
   void set(Node *c, typename Node::VX x) {
     evert(c);
     c->set(x);
@@ -163,50 +96,6 @@ struct Link_Cut_Tree {
   typename Node::X prod_path(int a, int b) {
     evert(a), expose(b);
     return (*this)[b]->x;
-  }
-
-  // subtree 用の node を使う
-  typename Node::X prod_subtree(int v, int root) {
-    static_assert(Node::NODE_FOR_SUBTREE);
-    if (v == root) {
-      evert(root);
-      return (*this)[root]->x;
-    }
-    root = jump(v, root, 1);
-    cut(v, root);
-    typename Node::X res = (*this)[v]->x;
-    link(v, root);
-    return res;
-  }
-
-  vc<int> collect_heavy_path(int v) {
-    np c = (*this)[v];
-    while (!is_root(c)) c = c->p;
-    vc<int> res;
-    auto dfs = [&](auto &dfs, np c, bool rev) -> void {
-      if (!rev) {
-        if (c->l) dfs(dfs, c->l, rev ^ c->rev);
-        res.eb(c->idx);
-        if (c->r) dfs(dfs, c->r, rev ^ c->rev);
-      } else {
-        if (c->r) dfs(dfs, c->r, rev ^ c->rev);
-        res.eb(c->idx);
-        if (c->l) dfs(dfs, c->l, rev ^ c->rev);
-      }
-    };
-    dfs(dfs, c, false);
-    return res;
-  }
-
-  void debug() {
-    print("p, l, r, rev");
-    auto f = [&](np c) -> int { return (c ? c->idx : -1); };
-    FOR(i, len(nodes)) { print(i, ",", f((*this)[i]->p), f((*this)[i]->l), f((*this)[i]->r), (*this)[i]->rev); }
-    FOR(i, len(nodes)) {
-      np c = (*this)[i];
-      if (c->l) assert(c->l->p == c);
-      if (c->r) assert(c->r->p == c);
-    }
   }
 
 private:
