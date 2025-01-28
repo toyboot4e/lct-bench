@@ -9,20 +9,11 @@ module Lct
 
     -- * Constructors
     new,
-    newInv,
     build,
-    buildInv,
-
-    -- * Read/write
-    -- TODO: read
     write,
     modify,
-
-    -- * Link/cut
     link,
     cut,
-
-    -- * Products
     prodPath,
   )
 where
@@ -34,7 +25,6 @@ import Data.Bits hiding (rotate)
 import Data.Vector.Generic.Mutable qualified as VGM
 import Data.Vector.Unboxed qualified as VU
 import Data.Vector.Unboxed.Mutable qualified as VUM
-import Debug.Trace
 
 -- | Vertex in original grpah.
 type Vertex = Int
@@ -66,25 +56,15 @@ data Lct s a = Lct
     vLct :: !(VUM.MVector s a),
     -- | Decomposed node data storage: aggregation of payloads.
     aggLct :: !(VUM.MVector s a),
-    -- | Decomposed node data storage: dual aggregation (right fold) of paylods. This is required
-    -- for non-commutative monoids only.
-    dualAggLct :: !(VUM.MVector s a),
     -- | Decomposed node data storage: path-parent aggregation value. This is required for subtree
     -- folding queries over commutative monoids only.
-    midLct :: !(VUM.MVector s a),
-    -- |  This is required for subtree folding queries over commutative monoids only.
-    invOpLct :: !(a -> a)
+    midLct :: !(VUM.MVector s a)
   }
 
 -- | \(O(N)\)
 {-# INLINE new #-}
 new :: (PrimMonad m, Monoid a, VU.Unbox a) => Int -> m (Lct (PrimState m) a)
-new = newInv id
-
--- | \(O(N)\)
-{-# INLINE newInv #-}
-newInv :: (PrimMonad m, Monoid a, VU.Unbox a) => (a -> a) -> Int -> m (Lct (PrimState m) a)
-newInv !invOpLct n = do
+new n = do
   lLct <- VUM.replicate n undefLct
   rLct <- VUM.replicate n undefLct
   pLct <- VUM.replicate n undefLct
@@ -92,45 +72,25 @@ newInv !invOpLct n = do
   revLct <- VUM.replicate n (Bit False)
   vLct <- VUM.replicate n mempty
   aggLct <- VUM.replicate n mempty
-  -- non-commutative monoids only
-  dualAggLct <- VUM.replicate n mempty
   -- commutative monoid subtree folding queries only
   midLct <- VUM.replicate n mempty
   pure Lct {..}
 
 -- | \(O(N + E \log E)\)
 {-# INLINE build #-}
-build :: (PrimMonad m, Monoid a, VU.Unbox a) => VU.Vector a -> VU.Vector (Vertex, Vertex) -> m (Lct (PrimState m) a)
-build = buildInv id
-
--- | \(O(N + E \log E)\)
-{-# INLINE buildInv #-}
-buildInv :: (PrimMonad m, Monoid a, VU.Unbox a) => (a -> a) -> VU.Vector a -> VU.Vector (Vertex, Vertex) -> m (Lct (PrimState m) a)
-buildInv !invOpLct xs es = do
-  lct <- do
-    let !n = VU.length xs
-    lLct <- VUM.replicate n undefLct
-    rLct <- VUM.replicate n undefLct
-    pLct <- VUM.replicate n undefLct
-    sLct <- VUM.replicate n 0
-    revLct <- VUM.replicate n (Bit False)
-    vLct <- VU.thaw xs
-    aggLct <- VUM.replicate n mempty
-    dualAggLct <- VUM.replicate n mempty
-    midLct <- VUM.replicate n mempty
-    pure Lct {..}
+build :: (PrimMonad m, Monoid a, VU.Unbox a) => Int -> VU.Vector (Vertex, Vertex) -> m (Lct (PrimState m) a)
+build n es = do
+  lct <- new n
   VU.forM_ es $ \(!u, !v) -> do
     link lct u v
   pure lct
-
--- TODO: getRoot
 
 -- -------------------------------------------------------------------------------------------------
 -- Balancing
 -- -------------------------------------------------------------------------------------------------
 
 -- | \(O(1)\) Rotates up a non-root node.
--- {-# INLINE rotate #-}
+-- {-# INLINE rotate #-} -- コンパイルが長いので INLINE を外す (INLINE を付けると若干速くなる)
 rotate :: (PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> IndexLct -> m ()
 rotate lct@Lct {pLct, lLct, rLct} v = stToPrim $ do
   p <- VGM.unsafeRead pLct v
@@ -184,7 +144,7 @@ rotate lct@Lct {pLct, lLct, rLct} v = stToPrim $ do
 
 -- | Amortized \(O(\log N)\). Moves a node up to the root, performing self-balancing heuristic
 -- called rotations.
--- {-# INLINE splay #-}
+-- {-# INLINE splay #-} -- コンパイルが長いので INLINE を外す (INLINE を付けると若干速くなる)
 splay :: (PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> IndexLct -> m ()
 splay lct@Lct {pLct} c = stToPrim $ do
   pushNode lct c
@@ -250,7 +210,7 @@ data NodePlaceLct = RootNodeLct | LeftNodeLct | RightNodeLct
 -- | \(O(1)\)
 {-# INLINE nodePlace #-}
 nodePlace :: (PrimMonad m) => Lct (PrimState m) a -> IndexLct -> m NodePlaceLct
-nodePlace Lct {..} v = do
+nodePlace Lct {pLct, lLct, rLct} v = do
   p <- VGM.unsafeRead pLct v
   if nullLct p
     then pure RootNodeLct
@@ -265,7 +225,7 @@ nodePlace Lct {..} v = do
             else pure RootNodeLct
 
 -- -------------------------------------------------------------------------------------------------
--- Node operations
+-- Node methods
 -- -------------------------------------------------------------------------------------------------
 
 -- | Amortized \(O(\log N)\). Propgates the lazily propagated values on a node.
@@ -291,11 +251,9 @@ reverseNode lct@Lct {revLct} i = do
 -- | \(O(1)\) Reverses the left and the right children, lazily and recursively.
 {-# INLINE swapLrNodeLct #-}
 swapLrNodeLct :: (PrimMonad m, VU.Unbox a) => Lct (PrimState m) a -> IndexLct -> m ()
-swapLrNodeLct Lct {lLct, rLct, aggLct, dualAggLct} i = do
+swapLrNodeLct Lct {lLct, rLct} i = do
   -- swap chidlren
   VGM.unsafeModifyM lLct (VGM.unsafeExchange rLct i) i
-  -- swap aggLct[i] and dualAggLct[i]
-  VGM.unsafeModifyM aggLct (VGM.unsafeExchange dualAggLct i) i
 
 -- | \(O(1)\) Recomputes the node size and the monoid aggregation.
 {-# INLINE updateNodeLct #-}
@@ -306,50 +264,41 @@ updateNodeLct Lct {..} i = do
   v <- VGM.unsafeRead vLct i
   m <- VGM.unsafeRead midLct i
 
-  (!size', !agg', !dualAgg') <-
+  (!size', !agg') <-
     if nullLct l
-      then pure (1 :: Int, v, v)
+      then pure (1 :: Int, v)
       else do
         lSize <- VGM.unsafeRead sLct l
         lAgg <- VGM.unsafeRead aggLct l
-        lDualAgg <- VGM.unsafeRead dualAggLct l
-        pure (lSize + 1, lAgg <> v, v <> lDualAgg)
+        pure (lSize + 1, lAgg <> v)
 
-  (!size'', !agg'', !dualAgg'') <-
+  (!size'', !agg'') <-
     if nullLct r
-      then pure (size', agg', dualAgg')
+      then pure (size', agg')
       else do
         rSize <- VGM.unsafeRead sLct r
         rAgg <- VGM.unsafeRead aggLct r
-        rDualAgg <- VGM.unsafeRead dualAggLct r
-        pure (size' + rSize, agg' <> rAgg, rDualAgg <> dualAgg')
+        pure (size' + rSize, agg' <> rAgg)
 
   VGM.unsafeWrite sLct i size''
   VGM.unsafeWrite aggLct i agg''
-  VGM.unsafeWrite dualAggLct i dualAgg''
 
 -- | \(O(1)\) Called on adding a path-parent edge. This is for subtree folding.
 {-# INLINE addLightLct #-}
 addLightLct :: (PrimMonad m, Semigroup a, VU.Unbox a) => Lct (PrimState m) a -> IndexLct -> IndexLct -> m ()
-addLightLct Lct {midLct} p c = do
-  -- newChild <- VGM.unsafeRead subtreeAggLct c
-  -- VGM.unsafeModify midLct (newChild <>) p
+addLightLct _ _ _ = do
   pure ()
 
 -- | \(O(1)\) Called on changing a path-parent edge. This is for subtree folding.
 {-# INLINE changeLightLct #-}
 changeLightLct :: (PrimMonad m) => Lct (PrimState m) a -> IndexLct -> IndexLct -> IndexLct -> m ()
-changeLightLct lct u v p = do
-  -- FIXME: why no operation
+changeLightLct _ _ _  _ = do
   pure ()
 
 -- | \(O(1)\) Called on erasing a path-parent edge. This is for subtree folding.
 {-# INLINE eraseLightLct #-}
 eraseLightLct :: (PrimMonad m, Semigroup a, VU.Unbox a) => Lct (PrimState m) a -> IndexLct -> IndexLct -> m ()
-eraseLightLct Lct {..} p c = do
-  -- sub <- VGM.unsafeRead subtreeAggLct c
-  -- let !sub' = invOpLct sub
-  -- VGM.unsafeModify midLct (<> sub') p
+eraseLightLct _ _ _ = do
   pure ()
 
 -- -------------------------------------------------------------------------------------------------
@@ -363,7 +312,7 @@ eraseLightLct Lct {..} p c = do
 -- opeartion, all children of @v0@ are detached from the preferred path.
 {-# INLINE expose #-}
 expose :: (PrimMonad m, Monoid a, VU.Unbox a) => Lct (PrimState m) a -> IndexLct -> m IndexLct
-expose lct@Lct {pLct, rLct} v0 = stToPrim $ do
+expose lct@Lct {pLct, rLct} v0 = do
   let inner v lastRoot
         | nullLct v = pure lastRoot
         | otherwise = do

@@ -4,11 +4,11 @@
 
 Linux の Nix (Flakes) ユーザは =direnv allow= で環境構築できると思います。
 
-他の環境はセットアップできていません。
+他の環境はセットアップできていないので、申し訳ないですがソースの閲覧のみとなります。
 
 ** テストの実行方法
 
-[[https://github.com/casey/just][=just=]] (タスクランナー) でコマンドを作成しました。
+[[https://github.com/casey/just][=just=]] (タスクランナー) で実行します。
 
 *** C++ 版のテスト実行
 
@@ -48,5 +48,5 @@ C++ の実行結果 (0.243 ms) に比べ、 Haskell の実行結果 (3.07 ms) �
 
 - [[./hs/src/Lct.hs]]: link/cut tree の実装モジュールです。
 - [[./hs/app/lct-test.hs]]: テスト問題の回答プログラムです。
-  - [[https://judge.yosupo.jp/problem/dynamic_tree_vertex_add_path_sum][Dynamic Tree Vertex Add Path Sum]]: テスト用の問題で
+  - [[https://judge.yosupo.jp/problem/dynamic_tree_vertex_add_path_sum][Dynamic Tree Vertex Add Path Sum]]: テスト用の問題です。
 
