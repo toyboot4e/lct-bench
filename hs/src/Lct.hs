@@ -78,9 +78,19 @@ new n = do
 
 -- | \(O(N + E \log E)\)
 {-# INLINE build #-}
-build :: (PrimMonad m, Monoid a, VU.Unbox a) => Int -> VU.Vector (Vertex, Vertex) -> m (Lct (PrimState m) a)
-build n es = do
-  lct <- new n
+build :: (PrimMonad m, Monoid a, VU.Unbox a) => VU.Vector a -> VU.Vector (Vertex, Vertex) -> m (Lct (PrimState m) a)
+build xs es = do
+  lct <- do
+    let !n = VU.length xs
+    lLct <- VUM.replicate n undefLct
+    rLct <- VUM.replicate n undefLct
+    pLct <- VUM.replicate n undefLct
+    sLct <- VUM.replicate n 0
+    revLct <- VUM.replicate n (Bit False)
+    vLct <- VU.thaw xs
+    aggLct <- VUM.replicate n mempty
+    midLct <- VUM.replicate n mempty
+    pure Lct {..}
   VU.forM_ es $ \(!u, !v) -> do
     link lct u v
   pure lct
