@@ -1,10 +1,12 @@
 * LCT 高速化
 
+質問用のリポジトリです。質問内容は一番下の見出しに記載しました。
+
 ** 環境構築
 
 Linux の Nix (Flakes) ユーザは =direnv allow= で環境構築できると思います。
 
-他の環境はセットアップできていないので、申し訳ないですがソースの閲覧のみとなります。
+他の環境はセットアップできておりません。ご了承ください。
 
 ** テストの実行方法
 
@@ -46,7 +48,49 @@ Haskell の入力処理は 0.109 ms でしたので、やはり LCT の計算部
 
 C++ の実行結果 (0.243 ms) に比べ、 Haskell の実行結果 (3.07 ms) が遅いです。 C++ の 2 ~ 4 倍程度まで高速化したいのですが、何か方法に心当たりがあれば教えてください。
 
-- [[./hs/src/Lct.hs]]: link/cut tree の実装モジュールです。
+- [[./hs/src/Lct.hs]]: link/cut tree の実装モジュールです。このソース中で高速化できる点があればお伺いしたいです。
 - [[./hs/app/lct-test.hs]]: テスト問題の回答プログラムです。
   - [[https://judge.yosupo.jp/problem/dynamic_tree_vertex_add_path_sum][Dynamic Tree Vertex Add Path Sum]]: テスト用の問題です。
+
+=Lct.hs= は基本的に C++ 版の ([[./cpp/graph/ds/link_cut_tree.hpp]]) の写経です。データの持ち方は異なりますが、その他のソースはほぼ同一ですので、 Haskell ならではの低速化がないか探しています。
+
+CPP 版のデータの持ち方:
+
+#+BEGIN_SRC cpp
+struct Link_Cut_Tree {
+  using np = Node *;
+  int n;
+  vc<Node> nodes;
+}
+
+struct Node {
+  using np = Node *;
+  np l, r, p;
+  int idx, size;
+  bool rev;
+  struct X {
+    ll cnt, sum;
+  };
+
+  using VX = X;
+  X x, vx, mid;
+  ll lazy, lazy_light, cancel;
+}
+#+END_SRC
+
+Haskell 版のデータの持ち方:
+
+#+BEGIN_SRC haskell
+-- | Link/cut tree.
+data Lct s a = Lct
+  { lLct :: !(VUM.MVector s IndexLct),
+    rLct :: !(VUM.MVector s IndexLct),
+    pLct :: !(VUM.MVector s IndexLct),
+    sLct :: !(VUM.MVector s Int),
+    revLct :: !(VUM.MVector s Bit),
+    vLct :: !(VUM.MVector s a),
+    aggLct :: !(VUM.MVector s a),
+    midLct :: !(VUM.MVector s a)
+  }
+#+END_SRC
 
