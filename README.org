@@ -4,7 +4,7 @@
 
 ** 質問内容
 
-C++ ライブラリを写経してテスト問題 ([[https://judge.yosupo.jp/problem/dynamic_tree_vertex_add_path_sum][Dynamic Tree Vertex Add Path Sum]]) を解きました。 C++ の実行結果 (0.259 ms) に比べ、 Haskell の実行結果 (2.47 ms) が約 10 倍遅いです。 C++ の 2 ~ 4 倍程度まで高速化したいのですが、何か方法に心当たりがあれば教えてください。
+C++ ライブラリを写経してテスト問題 ([[https://judge.yosupo.jp/problem/dynamic_tree_vertex_add_path_sum][Dynamic Tree Vertex Add Path Sum]]) を解きました。 C++ の実行結果 (0.259 秒) に比べ、 Haskell の実行結果 (2.47 秒) が約 10 倍遅いです。 C++ の 2 ~ 4 倍程度まで高速化したいのですが、何か方法に心当たりがあれば教えてください。
 
 - [[./hs/src/Lct.hs]]: link/cut tree の実装モジュールです。このソース中で高速化できる点があればお伺いしたいです。
 - [[./hs/app/lct-test.hs]]: テスト問題の回答プログラムです。
@@ -54,5 +54,5 @@ WARNING:onlinejudge_verify.languages.user_defined:The functionality to list depe
 #+END_SRC
 
 #+BEGIN_QUOTE
-Haskell の入力処理は 0.109 ms でしたので、やはり LCT の計算部分が重いようです。
+Haskell の入力処理は 0.109 秒でしたので、やはり LCT の計算部分が重いようです。
 #+END_QUOTE
