@@ -12,13 +12,37 @@ Linux の Nix (Flakes) ユーザは =direnv allow= で環境構築できると�
 
 *** C++ のテスト実行
 
+#+CAPTION: 実行コマンド
 #+BEGIN_SRC sh
 $ just cpp
 #+END_SRC
 
+#+CAPTION: 実行結果
+#+BEGIN_SRC txt
+[INFO] slowest: 0.243964 sec  (for max_random_01)
+[INFO] max memory: 26.880000 MB  (for max_random_00)
+[SUCCESS] test success: 16 cases
+#+END_SRC
+
 *** Haskell のテスト実行
 
+#+CAPTION: 実行コマンド
 #+BEGIN_SRC sh
 $ just hs
 #+END_SRC
+
+#+CAPTION: 実行結果
+#+BEGIN_SRC txt
+[INFO] slowest: 3.078916 sec  (for max_random_00)
+[INFO] max memory: 44.320000 MB  (for max_random_00)
+[SUCCESS] test success: 12 cases
+#+END_SRC
+
+#+BEGIN_QUOTE
+Haskell の入力処理は 0.109 ms でしたので、やはり LCT の計算部分が重いようです。
+#+END_QUOTE
+
+** 質問内容
+
+C++ の実行結果 (0.243 ms) に比べ、 Haskell の実行結果 (3.07 ms) が遅いです。 C++ の 2 ~ 4 倍程度まで高速化したいのですが、何か方法に心当たりがあれば教えてください。
 

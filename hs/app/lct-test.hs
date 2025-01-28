@@ -11,10 +11,9 @@ import Util
 main :: IO ()
 main = do
   (!n, !q) <- ints2
-  xs <- VU.map Sum <$> ints
-  -- uvs <- VU.replicateM (n - 1) $ withLine ((,) <$> mintP <*> mintP)
-  uvs <- VU.replicateM (n - 1) ints2
-  qs <-
+  !xs <- VU.map Sum <$> ints
+  !uvs <- VU.replicateM (n - 1) ints2
+  !qs <-
     VU.replicateM q $
       withLine $
         intP >>= \case
